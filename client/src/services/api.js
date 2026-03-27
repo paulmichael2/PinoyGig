@@ -1,5 +1,27 @@
 import axios from 'axios';
 
+const AUTH_TOKEN_KEY = 'pinoygig.auth.token';
+
+export const getStoredToken = () => {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    return window.localStorage.getItem(AUTH_TOKEN_KEY);
+};
+
+export const setStoredToken = (token) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    if (token) {
+        window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+        return;
+    }
+
+    window.localStorage.removeItem(AUTH_TOKEN_KEY);
+};
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -9,11 +31,24 @@ const api = axios.create({
     },
 });
 
+api.interceptors.request.use((config) => {
+    const token = getStoredToken();
+
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    } else if (config.headers?.Authorization) {
+        delete config.headers.Authorization;
+    }
+
+    return config;
+});
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
             console.warn('Unauthorized access - Redirecting to login...');
+            setStoredToken(null);
         }
         return Promise.reject(error);
     }

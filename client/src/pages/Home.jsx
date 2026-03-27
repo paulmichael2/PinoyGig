@@ -103,7 +103,7 @@ const Home = () => {
                              
                           </div>
                       </div>
-                      <p className="text-sm font-medium text-slate-700 leading-snug px-1 mb-2">Help Deploy My Website</p>
+                      <p className="text-sm font-medium text-slate-700 leading-snug px-1 mb-2">Teach me how to deploy my website</p>
                       <div className="flex items-center justify-between px-1">
                          <div className="flex text-yellow-400">
                              <Star className="w-3 h-3 fill-current" />

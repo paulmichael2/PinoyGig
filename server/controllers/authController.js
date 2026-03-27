@@ -23,14 +23,19 @@ const generateToken = (id) => {
     });
 };
 
-const setTokenCookie = (res, token) => {
+const getCookieOptions = () => {
     const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('token', token, {
+
+    return {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? 'none' : 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    };
+};
+
+const setTokenCookie = (res, token) => {
+    res.cookie('token', token, getCookieOptions());
 };
 
 
@@ -53,6 +58,7 @@ export const register = async(req, res) => {
 
         res.status(201).json({
             success: true,
+            token,
             user: serializeUser(user),
         });
     } catch (error) {
@@ -98,6 +104,7 @@ export const login = async(req, res) => {
 
         res.json({
             success: true,
+            token,
             user: serializeUser(user),
         });
     } catch (error) {
@@ -112,8 +119,9 @@ export const login = async(req, res) => {
 
 export const logout = async(req, res) => {
     res.cookie('token', '', {
-        httpOnly: true,
+        ...getCookieOptions(),
         expires: new Date(0),
+        maxAge: 0,
     });
 
     res.json({

@@ -1,9 +1,23 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/index.js';
 
-export const protect = async (req, res, next) => {
+const getTokenFromRequest = (req) => {
+    const cookieToken = req.cookies.token;
+    if (cookieToken) {
+        return cookieToken;
+    }
+
+    const authorizationHeader = req.headers.authorization || '';
+    if (authorizationHeader.startsWith('Bearer ')) {
+        return authorizationHeader.slice(7).trim();
+    }
+
+    return null;
+};
+
+export const protect = async(req, res, next) => {
     try {
-        const token = req.cookies.token;
+        const token = getTokenFromRequest(req);
 
         if (!token) {
             return res.status(401).json({
@@ -34,9 +48,9 @@ export const protect = async (req, res, next) => {
     }
 };
 
-export const optionalAuth = async (req, res, next) => {
+export const optionalAuth = async(req, res, next) => {
     try {
-        const token = req.cookies.token;
+        const token = getTokenFromRequest(req);
 
         if (token) {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
